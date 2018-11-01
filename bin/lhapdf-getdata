@@ -28,18 +28,20 @@ def getPDFSetList(url):
     logging.debug("Getting PDF file list from '%s'" % url)
     import urllib2
     hreq = None
+    rtn = []
     try:
         hreq = urllib2.urlopen(url)
         pdflistpage = hreq.read()
         logging.debug(pdflistpage)
         hreq.close()
-        import re
-        re_anchor = re.compile(r'^\s*<tr>.*<td><a\s+href="([^"]+)">\1.*$')
-        rtn = []
         for line in pdflistpage.splitlines():
-            m = re_anchor.match(line)
-            if m:
-                rtn.append(m.group(1))
+         if line.find('img')>0: continue
+         if line.find('class="name"')<0:continue
+         i = line.find('title="')
+         j = i+len('title="')
+         k = line[j:].find('"')
+         if i<0 or k<0 : continue
+         rtn.append(line[j:j+k])
         return rtn
     except urllib2.URLError, e:
         logging.error("Problem downloading PDF file list from '%s'" % url)
